@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1:3306
--- 生成日期： 2024-07-21 10:08:00
+-- 生成日期： 2024-07-22 02:33:36
 -- 服务器版本： 8.3.0
 -- PHP 版本： 8.2.18
 
@@ -60,6 +60,21 @@ CREATE TABLE IF NOT EXISTS `local_user_auth` (
   `summary` text NOT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `unique-nickname` (`nickname`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `timeline_cache`
+--
+
+DROP TABLE IF EXISTS `timeline_cache`;
+CREATE TABLE IF NOT EXISTS `timeline_cache` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `url` varchar(500) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `sendtimestamp` bigint UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `url-index` (`url`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 COMMIT;
 
