@@ -1,6 +1,7 @@
 <?php
 require_once SYS_ROOT."model/class/user.php";
 require_once SYS_ROOT."model/utils/curl.php";
+require_once SYS_ROOT."module/timeline.php";
 
 interface model_inotes{
 	function getSenderObject():model_profile|null;
@@ -205,7 +206,18 @@ class model_remote_note implements model_inotes{
 		return $this->getSenderDomain();
 	}
 	function getAPObject():array{
-		return json_decode(curl_request($this->url,'','',array("Accept: application/activity+json")),true);
+		$iri = json_decode(curl_request($this->url,'','',array("Accept: application/activity+json")),true);
+		if($iri == null){
+			return array();
+		}
+		if($iri["type"] == "Create"){
+			$this->url = $iri["object"]["id"];
+			$this->sendernick = "";
+			$this->senderurl = $iri["actor"];
+			$this->domain = "";
+			return $iri["object"];
+		}
+		return $iri;
 	}
 	function getSendtime():int{
 		$ap = $this->getAPObject();
@@ -230,6 +242,7 @@ class noteObjectProvider{
 			return null;
 		}
 		$urlObjectCache["https://$domain/status/$tid"] = $object;
+		federatedTimeline::addRow("https://$domain/status/$tid",$object->getSendtime());
 		return $object;
 	}
 	static function getObjectByURL($url):model_inotes|null{
@@ -251,7 +264,8 @@ class noteObjectProvider{
 			}
 		}
 		$urlObjectCache[$url] = $tieobj;
-		$urlObjectCache[$tieobj->getURI()] = $tieobj;
+		$urlObjectCache[preg_replace("~^http:~","https:",$tieobj->getURI())] = $tieobj;
+		federatedTimeline::addRow($tieobj->getURI(),$tieobj->getSendtime());
 		return $tieobj;
 	}
 }

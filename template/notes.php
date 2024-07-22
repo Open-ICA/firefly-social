@@ -19,11 +19,18 @@ function get(\model_inotes $note,bool $aslink=false){
 namespace template\notes\display\hideparent;
 
 function get(\model_inotes $note,bool $aslink=false){
+	global $_config;
 	$sender = $note->getSenderObject();
-	$header_url = $sender->getHeadImageURI();
-	$usergid = $sender->getNickName()."@".$note->getDomain();
+	if($sender != null){
+		$header_url = $sender->getHeadImageURI();
+		$usergid = $sender->getNickName()."@".$note->getDomain();
+		$displayname = $sender->getDisplayName();
+	} else {
+		$header_url = $_config["display"]["default_header"];
+		$usergid = "undefined@".$note->getDomain();
+		$displayname = "用户不存在";
+	}
 	$sendtimec = date("Y-m-d h:i:s",$note->getSendtime());
-	$displayname = $sender->getDisplayName();
 	$content = \algorithm\safehtml\process($note->getContent());
 	$title = $note->getTitle();
 	if($title != ""){
@@ -31,10 +38,12 @@ function get(\model_inotes $note,bool $aslink=false){
 	} else {
 		$content = "<div style=\"margin-top:4px;\">$content</div>";
 	}
+	$ourl = $note->getURI();
 	if($aslink){
-		$url = $note->getURI();
+		$url = "/notes/".str_replace(array("=","+","/"),array("","-","*"),base64_encode(preg_replace("~^https?:\/\/~","",$note->getURI())));
 		$content = "<a href=\"$url\" style=\"color:black;text-decoration:none;\">$content</a>";
 	}
+	$toOriginTag = '<a href="'.$ourl.'" style="color:black;text-decoration:none;" title="前往原站">✈️</a>';
 	return <<<EOF
 	<div style="position:relative;height:67px;">
 		<a href="/@$usergid">
@@ -45,6 +54,7 @@ function get(\model_inotes $note,bool $aslink=false){
 		<div style="padding-left:75px;">
 			<a href="/@$usergid" style="color:black;text-decoration:none;"><h2 style="display:inline;">$displayname</h2><br/>
 			@$usergid</a><br/>于 $sendtimec 发布
+			$toOriginTag
 		</div>
 	</div>
 	<div>

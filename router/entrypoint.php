@@ -14,10 +14,15 @@ function router_entrypoint(){
 		router_indexc();
 		die();
 	}
-	// Index page display
+	// Timeline page display
 	if(SYS_REQPATH == "/local"){
 		require_once SYS_ROOT."router/localtimelinec.php";
 		router_localtimelinec();
+		die();
+	}
+	if(SYS_REQPATH == "/network"){
+		require_once SYS_ROOT."router/globaltimelinec.php";
+		router_globaltimelinec();
 		die();
 	}
 	// Webfinger

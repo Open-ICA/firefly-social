@@ -190,20 +190,24 @@ class model_remote_user implements model_profile{
 	private string $domain="";
 	private string $outboxurl="";
 	function getAPOutbox():array{
-		if($this->$outboxurl == ""){
+		if($this->outboxurl == ""){
 			$ics = $this->getAPProfile();
 			if(isset($ics["outbox"])){
-				$this->outbox = $ics["outbox"];
+				$this->outboxurl = $ics["outbox"];
 			}
 		}
-		if($this->$outboxurl == ""){
+		if($this->outboxurl == ""){
 			return "";
 		}
-		return json_decode(curl_request($this->$outboxurl),true);
+		return json_decode(curl_request($this->outboxurl),true);
 	}
 	function getAPOutboxContents():array{
 		$outbox = $this->getAPOutbox();
-		return isset($outbox)?$outbox["orderedItems"]:array();
+		if(isset($outbox["first"])){
+			$firstPage = json_decode(curl_request($outbox["first"]),true);
+			return isset($firstPage["orderedItems"])?$firstPage["orderedItems"]:array();
+		}
+		return isset($outbox["orderedItems"])?$outbox["orderedItems"]:array();
 	}
 	function getDisplayName():string{
 		$ics = $this->getAPProfile();
@@ -224,8 +228,11 @@ class model_remote_user implements model_profile{
 	function getHeadImageURI():string{
 		$ics = $this->getAPProfile();
 		if(!isset($ics["icon"][0])){
-			global $_config;
-			return $_config["display"]["default_header"];
+			if(!isset($ics["icon"]["url"])){
+				global $_config;
+				return $_config["display"]["default_header"];
+			}
+			return $ics["icon"]["url"];
 		}
 		return $ics["icon"][0];
 	}
@@ -255,7 +262,8 @@ class model_remote_user implements model_profile{
 		if($url == ""){
 			return array();
 		}
-		return json_decode(curl_request($url,'','',array("Accept: application/activity+json")),true);
+		$data = json_decode(curl_request($url,'','',array("Accept: application/activity+json")),true);
+		return $data==null?[]:$data;
 	}
 	function getSummary():string{
 		$APProfile = $this->getAPProfile();
@@ -301,7 +309,7 @@ class userObjectProvider{
 	static private $uidCache=array();
 	static private $gidCache=array();
 	static private $uriCache=array();
-	static function getUserByLocalUID(int $uid):model_profile|null{
+	static function getUserByLocalUID(int $uid):model_auth_user|null{
 		global $_config;
 		$domain = $_config["site"]["domain"];
 		if(isset(userObjectProvider::$uidCache[$uid])){
@@ -321,7 +329,7 @@ class userObjectProvider{
 		userObjectProvider::$cacheHeap[$saveto] = $user;
 		return userObjectProvider::$cacheHeap[$saveto];
 	}
-	static function getUserByLocalNickname(string $nickname):model_profile|null{
+	static function getUserByLocalNickname(string $nickname):model_auth_user|null{
 		if(!preg_match("/^[A-Za-z0-9_\-\.]+$/",$nickname)){
 			return null;
 		}
