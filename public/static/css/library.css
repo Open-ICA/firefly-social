@@ -1,0 +1,12 @@
+.normilink{
+	color:black;
+}
+.normilink:hover{
+	text-decoration:none;
+}
+.tiezicontent a{
+	color:black;
+}
+.tiezicontent a:hover{
+	text-decoration:none;
+}

@@ -25,6 +25,12 @@ function router_entrypoint(){
 		router_globaltimelinec();
 		die();
 	}
+	// User Center display
+	if(substr(SYS_REQPATH,0,6) == "/user/" || SYS_REQPATH == "/user"){
+		require_once SYS_ROOT."router/router-uc.php";
+		ucrouter();
+		die();
+	}
 	// Webfinger
 	if(SYS_REQPATH == "/.well-known/webfinger"){
 		require_once SYS_ROOT."router/webfinger.php";

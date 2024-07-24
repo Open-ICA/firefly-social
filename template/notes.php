@@ -9,8 +9,10 @@ function get(\model_inotes $note,bool $aslink=false){
 		$parent = $note->getReplyTo();
 		if($parent != null){
 			$tdr = \template\notes\display\hideparent\get($parent,true);
-			$output .= "<div style=\"padding:4px;margin:3px;margin-bottom:5px;border:1px solid black;border-radius:3px;\">".$tdr."</div>";
+		} else {
+			$tdr = "帖子不存在";
 		}
+		$output .= "<div style=\"padding:4px;margin:3px;margin-bottom:5px;border:1px solid black;border-radius:3px;\">".$tdr."</div>";
 	}
 	$output .= \template\notes\display\hideparent\get($note,$aslink);
 	return $output;
@@ -34,9 +36,9 @@ function get(\model_inotes $note,bool $aslink=false){
 	$content = \algorithm\safehtml\process($note->getContent());
 	$title = $note->getTitle();
 	if($title != ""){
-		$content = "<h2 style=\"margin-top:4px;margin-bottom:4px;\">".str_replace(["<",">","\n"," "],["&lt;","&gt;","","&nbsp;"],$title)."</h2>".$content;
+		$content = "<h2 style=\"margin-top:4px;margin-bottom:4px;\">".str_replace(["<",">","\n"," "],["&lt;","&gt;","","&nbsp;"],$title)."</h2><div class='tiezicontent'>".$content."</div>";
 	} else {
-		$content = "<div style=\"margin-top:4px;\">$content</div>";
+		$content = "<div class='tiezicontent' style=\"margin-top:4px;\">$content</div>";
 	}
 	$ourl = $note->getURI();
 	if($aslink){

@@ -22,6 +22,7 @@ interface model_profile{
 class model_auth_user implements model_profile{
 	private int $uid=0;
 	private string $nickname="";
+	private string $sessionCode="";
 	function __construct($uid){
 		$this->uid = $uid;
 	}
@@ -151,6 +152,17 @@ class model_auth_user implements model_profile{
 		}
 		return $this->nickname;
 	}
+	function getSessionCode():string{
+		if($this->sessionCode == ""){
+			global $_sitedb;
+			$uid = $this->uid;
+			$result = $_sitedb->query("SELECT session FROM local_user_auth WHERE uid=$uid");
+			if(count($result["data"]) > 0){
+				$this->sessionCode = $result["data"][0]["session"];
+			}
+		}
+		return $this->sessionCode;
+	}
 	function getUID():int{
 		$uid = $this->uid;
 		return $uid;
@@ -173,7 +185,7 @@ class model_auth_user implements model_profile{
 			$nickname = $result["data"][0]["nickname"];
 			$this->nickname = $nickname;
 			$passcci = $result["data"][0]["passwordcci"];
-			$inputcci = password_cci_hash($uid,$nickname,$password);
+			$inputcci = algorithm\authcrypto\password_cci_hash($uid,$nickname,$password);
 			return $passcci == $inputcci;
 		}
 		return false;
@@ -405,6 +417,19 @@ class userObjectProvider{
 		userObjectProvider::$uriCache[$idurl] = $heapPos;
 		userObjectProvider::$cacheHeap[$heapPos] = $remote;
 		return $remote;
+	}
+	static function witUserSession(int $uid,string $name,string $ucode):model_profile|null{
+		$user = userObjectProvider::getUserByLocalUID($uid);
+		if($user == null){
+			return null;
+		}
+		if($user->getNickName() != $name){
+			return null;
+		}
+		if($user->getSessionCode() != $ucode){
+			return null;
+		}
+		return $user;
 	}
 }
 ?>

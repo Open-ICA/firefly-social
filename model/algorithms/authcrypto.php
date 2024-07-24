@@ -2,7 +2,7 @@
 namespace algorithm\authcrypto;
 require_once SYS_ROOT."model/algorithms/base16.php";
 
-function password_cci_hash(int $uid,string $nickname,string $password){
+function password_cci_hash(int $uid,string $username,string $password){
 	$cycle = md5(md5($username).md5($password).$uid);
 	$gent = array(
 		array("a","@"),array("b","#"),array("n","$"),array("v","%"),

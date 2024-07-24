@@ -26,13 +26,8 @@ function get($subtitle=""){
 					margin:auto;
 				}
 			}
-			.normilink{
-				color:black;
-			}
-			.normilink:hover{
-				text-decoration:none;
-			}
 		</style>
+		<link rel="stylesheet" type="text/css" href="/static/css/library.css"/>
 	</head>
 	<body>
 	<div id="firefly_common_main">

@@ -33,6 +33,9 @@ class model_local_note implements model_inotes{
 		}
 		return null;
 	}
+	function getTid():int{
+		return $this->tid;
+	}
 	function getContent():string{
 		$ap = $this->getAPObject();
 		if(isset($ap["content"])){
